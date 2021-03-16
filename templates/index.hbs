@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    {{css}}
+
+    {{papayaCss}}
+
+    * {
+      font-family: var(--vscode-editor-font-family);
+    }
+  </style>
+  
+  <title>NIFTI Viewer</title>
+</head>
+
+<body>
+  <div class="fixed inset-0 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="papaya" id="papaya" data-params="params"></div>
+      <!--
+      Background overlay, show/hide based on slide-over state.
+
+      Entering: "ease-in-out duration-500"
+        From: "opacity-0"
+        To: "opacity-100"
+      Leaving: "ease-in-out duration-500"
+        From: "opacity-100"
+        To: "opacity-0"
+    -->
+      <div id="bg-overlay" class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" style="pointer-events: none" aria-hidden="true">
+      </div>
+      <section class="absolute inset-y-0 right-0 pl-10 max-w-full flex" aria-labelledby="slide-over-heading">
+        <!--
+        Slide-over panel, show/hide based on slide-over state.
+
+        Entering: "transform transition ease-in-out duration-500 sm:duration-700"
+          From: "translate-x-full"
+          To: "translate-x-0"
+        Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
+          From: "translate-x-0"
+          To: "translate-x-full"
+      -->
+        <div class="relative w-screen max-w-md" id="panel">
+          <!--
+          Close button, show/hide based on slide-over state.
+
+          Entering: "ease-in-out duration-500"
+            From: "opacity-0"
+            To: "opacity-100"
+          Leaving: "ease-in-out duration-500"
+            From: "opacity-100"
+            To: "opacity-0"
+        -->
+          <div class="absolute top-0 left-0 -ml-8 pt-4 pr-2 flex sm:-ml-10 sm:pr-4" id="close-btn" data-close="false">
+            <button class="rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+              <span class="sr-only">Close panel</span>
+              <!-- Heroicon name: outline/x -->
+              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="h-full flex flex-col py-6 bg-white shadow-xl overflow-y-scroll">
+            <div class="px-4 sm:px-6">
+              <h2 id="slide-over-heading" class="text-lg font-medium text-gray-900">
+                Files
+              </h2>
+            </div>
+            <div class="mt-6 relative flex-1 px-4 sm:px-6">
+              <!-- Replace with your content -->
+              <div class="absolute inset-0 px-4 sm:px-6">
+                <!-- <div class="h-full border-2 border-dashed border-gray-200"></div> -->
+                <!-- This example requires Tailwind CSS v2.0+ -->
+                <div class="flex flex-col">
+                  <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                      <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                          <!-- <thead class="bg-gray-50">
+                          <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Path
+                            </th>
+                          </tr>
+                        </thead> -->
+                          <tbody class="bg-white divide-y divide-gray-200" id="files-tbody">
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <!-- /End replace -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script>
+    window.vscode = acquireVsCodeApi();
+
+    {{{papayaJs}}}
+
+    var params = [];
+    params["images"] = [""];
+
+
+    let bg_overlay = document.getElementById("bg-overlay");
+    let panel = document.getElementById("panel");
+    let close_btn = document.getElementById("close-btn");
+    let tbody = document.getElementById("files-tbody");
+
+    function close_panel() {
+      reset_panel();
+      bg_overlay.classList.add("ease-in-out", "duration-500", "opacity-0");
+      panel.classList.add(
+        "transform",
+        "transition",
+        "ease-in-out",
+        "duration-500",
+        "sm:duration-700",
+        "translate-x-full"
+      );
+      close_btn.classList.add("ease-in-out", "duration-500", "opacity-0");
+    }
+    function open_panel() {
+      reset_panel();
+      bg_overlay.classList.add("ease-in-out", "duration-500", "opacity-100");
+      panel.classList.add(
+        "transform",
+        "transition",
+        "ease-in-out",
+        "duration-500",
+        "sm:duration-700",
+        "translate-x-0"
+      );
+      close_btn.classList.add("ease-in-out", "duration-500", "opacity-100");
+    }
+
+    function reset_panel() {
+      bg_overlay.classList.remove(
+        "ease-in-out",
+        "duration-500",
+        "opacity-100",
+        "opacity-0"
+      );
+      panel.classList.remove(
+        "transform",
+        "transition",
+        "ease-in-out",
+        "duration-500",
+        "sm:duration-700",
+        "translate-x-0",
+        "translate-x-full"
+      );
+      close_btn.classList.add(
+        "ease-in-out",
+        "duration-500",
+        "opacity-100",
+        "opacity-0"
+      );
+    }
+
+    function table_append(item) {
+      tbody.innerHTML += `<tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                  <div class="flex items-center">
+                                    <div class="ml-4">
+                                      <div class="text-sm font-medium text-blue-700 cursor-pointer" onclick="loadNifti('${item}')">
+                                        ${item}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>`;
+    }
+
+    function loadNifti(path) {
+      close_panel();
+      close_btn.dataset.close = "true";
+      papaya.Container.resetViewer(0)
+      papaya.Container.addImage(0, 'http://localhost/' + path)
+    }
+
+    close_btn.addEventListener("click", () => {
+      if (close_btn.dataset.close === "false") {
+        close_panel();
+        close_btn.dataset.close = "true";
+      } else {
+        open_panel();
+        close_btn.dataset.close = "false";
+      }
+    });
+
+    JSON.parse('{{{files}}}').map(table_append);
+
+  </script>
+</body>
+
+</html>
