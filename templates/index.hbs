@@ -5,12 +5,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    {{css}}
-
     {{papayaCss}}
 
+    {{css}}
+
     * {
-      font-family: var(--vscode-editor-font-family);
+      font-family:  ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+
+    #hamburger-icon {
+      width: 20px;
+      height: 10px;
+      position: relative;
+      margin: 15px auto;
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+      -webkit-transition: .5s ease-in-out;
+      -moz-transition: .5s ease-in-out;
+      -o-transition: .5s ease-in-out;
+      transition: .5s ease-in-out;
+      cursor: pointer;
+    }
+
+    #hamburger-icon span {
+      display: block;
+      position: absolute;
+      height: 3px;
+      width: 100%;
+      background: #fff;
+      border-radius: 3px;
+      opacity: 1;
+      left: 0;
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+      -webkit-transition: .25s ease-in-out;
+      -moz-transition: .25s ease-in-out;
+      -o-transition: .25s ease-in-out;
+      transition: .25s ease-in-out;
+    }
+
+    #hamburger-icon span:nth-child(1) {
+      top: 0px;
+    }
+
+    #hamburger-icon span:nth-child(2),#hamburger-icon span:nth-child(3) {
+      top: 9px;
+    }
+
+    #hamburger-icon span:nth-child(4) {
+      top: 18px;
+    }
+
+    #hamburger-icon.open span:nth-child(1) {
+      top: 9px;
+      width: 0%;
+      left: 50%;
+    }
+
+    #hamburger-icon.open span:nth-child(2) {
+      -webkit-transform: rotate(45deg);
+      -moz-transform: rotate(45deg);
+      -o-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+
+    #hamburger-icon.open span:nth-child(3) {
+      -webkit-transform: rotate(-45deg);
+      -moz-transform: rotate(-45deg);
+      -o-transform: rotate(-45deg);
+      transform: rotate(-45deg);
+    }
+
+    #hamburger-icon.open span:nth-child(4) {
+      top: 9px;
+      width: 0%;
+      left: 50%;
+    }
+
+    button[class^="papaya"] {
+      color: #eee;
+      padding: 2px 4px 2px 4px;
+      border-radius: 2px;
+      border: 1px solid #eee;
+      background: transparent;
     }
   </style>
   
@@ -56,13 +137,19 @@
             To: "opacity-0"
         -->
           <div class="absolute top-0 left-0 -ml-8 pt-4 pr-2 flex sm:-ml-10 sm:pr-4" id="close-btn" data-close="false">
-            <button class="rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+            <button class="rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2" style="outline-style: none; box-shadow: none; border-color: transparent;">
               <span class="sr-only">Close panel</span>
               <!-- Heroicon name: outline/x -->
-              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              {{!-- <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              </svg> --}}
+              <div id="hamburger-icon" class="open">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
             </button>
           </div>
           <div class="h-full flex flex-col py-6 bg-white shadow-xl overflow-y-scroll">
@@ -130,6 +217,7 @@
         "translate-x-full"
       );
       close_btn.classList.add("ease-in-out", "duration-500", "opacity-0");
+      document.getElementById('hamburger-icon').classList.toggle('open');
     }
     function open_panel() {
       reset_panel();
@@ -143,6 +231,7 @@
         "translate-x-0"
       );
       close_btn.classList.add("ease-in-out", "duration-500", "opacity-100");
+      document.getElementById('hamburger-icon').classList.toggle('open');
     }
 
     function reset_panel() {
@@ -170,23 +259,42 @@
     }
 
     function table_append(item) {
+      let rand = '_' + Math.random().toString(36).substr(2, 9);
       tbody.innerHTML += `<tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-2 whitespace-nowrap">
                                   <div class="flex items-center">
-                                    <div class="ml-4">
-                                      <div class="text-sm font-medium text-blue-700 cursor-pointer" onclick="loadNifti('${item}')">
+                                    <div class="ml-2 static" onmouseenter="document.getElementById('${rand}').classList.remove('hidden')" onmouseleave="document.getElementById('${rand}').classList.add('hidden')">
+                                      <button class="outline-none cursor-pointer focus:outline-none text-blue-500 border px-3 py-1 bg-white rounded flex items-center min-w-32" onclick="loadNifti('${item}')">
                                         ${item}
-                                      </div>
+                                        <span>
+                                          <svg
+                                            class="fill-current h-4 w-4 transform group-hover:-rotate-180
+                                            transition duration-150 ease-in-out"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                          >
+                                            <path
+                                              d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+                                            />
+                                          </svg>
+                                        </span>
+                                      </button>
+                                      <ul class="bg-white border rounded hidden absolute z-50 text-blue-400 py-2 px-3 cursor-pointer" id="${rand}">
+                                        <li onclick="loadNifti('${item}', false)">As main image</li>
+                                        <li onclick="loadNifti('${item}', true)">As segmentation</li>
+                                      </ul>
                                     </div>
                                   </div>
                                 </td>
                               </tr>`;
     }
 
-    function loadNifti(path) {
+    function loadNifti(path, seg = false) {
       close_panel();
       close_btn.dataset.close = "true";
-      papaya.Container.resetViewer(0)
+      if (!seg) {
+        papaya.Container.resetViewer(0)
+      }
       papaya.Container.addImage(0, 'http://localhost/' + path)
     }
 
